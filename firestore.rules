@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // User profiles - users can only read/write their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth.uid == userId;
+    }
+    
+    // Transactions - users can only access their own transactions
+    match /transactions/{document=**} {
+      allow read, write: if request.auth.uid == resource.data.user_id;
+      allow create: if request.auth.uid == request.resource.data.user_id;
+    }
+    
+    // Budgets - users can only access their own budgets
+    match /budgets/{document=**} {
+      allow read, write: if request.auth.uid == resource.data.user_id;
+      allow create: if request.auth.uid == request.resource.data.user_id;
+    }
+    
+    // Goals - users can only access their own goals
+    match /goals/{document=**} {
+      allow read, write: if request.auth.uid == resource.data.user_id;
+      allow create: if request.auth.uid == request.resource.data.user_id;
+    }
+    
+    // Settings - users can only access their own settings
+    match /settings/{userId} {
+      allow read, write: if request.auth.uid == userId;
+    }
+    
+    // Default deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
